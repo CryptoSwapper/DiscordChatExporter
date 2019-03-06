@@ -1,4 +1,7 @@
-﻿namespace DiscordChatExporter.Core.Models
+﻿using System;
+using ByteSizeLib;
+
+namespace DiscordChatExporter.Core.Models
 {
     // https://discordapp.com/developers/docs/resources/channel#attachment-object
 
@@ -12,13 +15,17 @@
 
         public int? Height { get; }
 
-        public bool IsImage => Width != null;
-
         public string FileName { get; }
 
-        public long FileSize { get; }
+        public bool IsImage => FileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                               FileName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                               FileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                               FileName.EndsWith(".gif", StringComparison.OrdinalIgnoreCase) ||
+                               FileName.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase);
 
-        public Attachment(string id, int? width, int? height, string url, string fileName, long fileSize)
+        public ByteSize FileSize { get; }
+
+        public Attachment(string id, int? width, int? height, string url, string fileName, ByteSize fileSize)
         {
             Id = id;
             Url = url;

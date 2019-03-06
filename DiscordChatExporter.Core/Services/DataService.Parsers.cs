@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
+using ByteSizeLib;
 using DiscordChatExporter.Core.Internal;
 using DiscordChatExporter.Core.Models;
 using Newtonsoft.Json.Linq;
@@ -69,7 +70,9 @@ namespace DiscordChatExporter.Core.Services
             var width = json["width"]?.Value<int>();
             var height = json["height"]?.Value<int>();
             var fileName = json["filename"].Value<string>();
-            var fileSize = json["size"].Value<long>();
+            var fileSizeBytes = json["size"].Value<long>();
+
+            var fileSize = ByteSize.FromBytes(fileSizeBytes);
 
             return new Attachment(id, width, height, url, fileName, fileSize);
         }
@@ -140,13 +143,21 @@ namespace DiscordChatExporter.Core.Services
             return new Embed(title, url, timestamp, color, author, description, fields, thumbnail, image, footer);
         }
 
+        private Emoji ParseEmoji(JToken json)
+        {
+            var id = json["id"]?.Value<string>();
+            var name = json["name"]?.Value<string>();
+            var isAnimated = json["animated"]?.Value<bool>() ?? false;
+
+            return new Emoji(id, name, isAnimated);
+        }
+
         private Reaction ParseReaction(JToken json)
         {
             var count = json["count"].Value<int>();
-            var emojiId = json["emoji"]["id"]?.Value<string>();
-            var emojiName = json["emoji"]["name"].Value<string>();
+            var emoji = ParseEmoji(json["emoji"]);
 
-            return new Reaction(count, emojiId, emojiName);
+            return new Reaction(count, emoji);
         }
 
         private Message ParseMessage(JToken json)
